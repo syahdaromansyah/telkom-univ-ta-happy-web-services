@@ -1,0 +1,173 @@
+version: '3.8'
+services:
+  happy-mysql-db:
+    container_name: happy-mysql-db
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'happyMySQL'
+    ports:
+      - protocol: tcp
+        published: 3316
+        target: 3306
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 36M
+        limits:
+          cpus: '2'
+          memory: 248M
+
+  happy-user-svc:
+    container_name: happy-user-svc
+    ports:
+      - protocol: tcp
+        published: 55000
+        target: 55000
+    build:
+      context: './happy-user-service'
+      dockerfile: Dockerfile
+    image: happy-user-svc-img
+    environment:
+      APP_ENV: prod
+      DB_DRIVER: mysql
+      DB_SOURCE: 'root:happyMySQL@tcp(happy-mysql-db:3306)/happy_user_db'
+      SERVER_ADDR: ':55000'
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 36M
+        limits:
+          cpus: '2'
+          memory: 248M
+
+  happy-product-svc:
+    container_name: happy-product-svc
+    ports:
+      - protocol: tcp
+        published: 55001
+        target: 55000
+    build:
+      context: './happy-product-service'
+      dockerfile: Dockerfile
+    image: happy-product-svc-img
+    environment:
+      APP_ENV: prod
+      DB_DRIVER: mysql
+      DB_SOURCE: 'root:happyMySQL@tcp(happy-mysql-db:3306)/happy_product_db'
+      SERVER_ADDR: ':55000'
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 36M
+        limits:
+          cpus: '2'
+          memory: 248M
+
+  happy-order-svc:
+    container_name: happy-order-svc
+    ports:
+      - protocol: tcp
+        published: 55002
+        target: 55000
+    build:
+      context: './happy-order-service'
+      dockerfile: Dockerfile
+    image: happy-order-svc-img
+    environment:
+      APP_ENV: prod
+      DB_DRIVER: mysql
+      DB_SOURCE: 'root:happyMySQL@tcp(happy-mysql-db:3306)/happy_order_db?parseTime=true'
+      SERVER_ADDR: ':55000'
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 36M
+        limits:
+          cpus: '2'
+          memory: 248M
+
+  happy-feedback-svc:
+    container_name: happy-feedback-svc
+    ports:
+      - protocol: tcp
+        published: 55003
+        target: 55000
+    build:
+      context: './happy-feedback-service'
+      dockerfile: Dockerfile
+    image: happy-feedback-svc-img
+    environment:
+      APP_ENV: prod
+      DB_DRIVER: mysql
+      DB_SOURCE: 'root:happyMySQL@tcp(happy-mysql-db:3306)/happy_feedback_db?parseTime=true'
+      SERVER_ADDR: ':55000'
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 36M
+        limits:
+          cpus: '2'
+          memory: 248M
+
+  happy-api-svc:
+    container_name: happy-api-svc
+    ports:
+      - protocol: tcp
+        published: 55010
+        target: 55000
+    build:
+      context: './happy-api-service'
+      dockerfile: Dockerfile
+    image: happy-api-svc-img
+    environment:
+      APP_ENV: prod
+      HAPPY_USER_SERVICE_URL: 'http://happy-user-svc:55000'
+      HAPPY_PRODUCT_SERVICE_URL: 'http://happy-product-svc:55000'
+      HAPPY_ORDER_SERVICE_URL: 'http://happy-order-svc:55000'
+      HAPPY_FEEDBACK_SERVICE_URL: 'http://happy-feedback-svc:55000'
+      JWT_SECRET_KEY: some_JWT_secret_key_exp
+      ALLOW_ORIGINS: 'http://localhost:3000'
+      SERVER_ADDR: ':55000'
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 36M
+        limits:
+          cpus: '2'
+          memory: 248M
+
+  happy-admin-svc:
+    container_name: happy-admin-svc
+    ports:
+      - protocol: tcp
+        published: 55020
+        target: 55000
+    build:
+      context: './happy-admin-service'
+      dockerfile: Dockerfile
+    image: happy-admin-svc-img
+    environment:
+      APP_ENV: prod
+      ADMIN_UNAME: 'admin1'
+      ADMIN_PASS: '12345678'
+      HAPPY_USER_SERVICE_URL: 'http://happy-user-svc:55000'
+      HAPPY_PRODUCT_SERVICE_URL: 'http://happy-product-svc:55000'
+      HAPPY_ORDER_SERVICE_URL: 'http://happy-order-svc:55000'
+      HAPPY_FEEDBACK_SERVICE_URL: 'http://happy-feedback-svc:55000'
+      ALLOW_ORIGINS: 'http://localhost:3005'
+      SERVER_ADDR: ':55000'
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 36M
+        limits:
+          cpus: '2'
+          memory: 248M
