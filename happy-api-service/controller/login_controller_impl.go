@@ -100,6 +100,8 @@ func (controller *LoginControllerImpl) Login(fiberCtx *fiber.Ctx) error {
 		Name:     "token",
 		Path:     "/",
 		Value:    jwtToken,
+		SameSite: "None",
+		Secure:   true,
 		HTTPOnly: true,
 	}
 
@@ -107,6 +109,8 @@ func (controller *LoginControllerImpl) Login(fiberCtx *fiber.Ctx) error {
 		Name:     "id_user",
 		Path:     "/",
 		Value:    strconv.Itoa(int(userSvcResData.Id)),
+		SameSite: "None",
+		Secure:   true,
 		HTTPOnly: true,
 	}
 
